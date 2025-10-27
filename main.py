@@ -1,9 +1,8 @@
 # main.py
 import os
 import sys
-import asyncio
 
-# Désactive la voix
+# 🔒 Désactive la voix
 os.environ["PYCORD_NO_VOICE"] = "1"
 sys.modules["audioop"] = type(sys)("")
 
@@ -26,12 +25,12 @@ bot = commands.Bot(intents=intents, help_command=None)
 async def on_ready():
     print(f"✅ {bot.user} est en ligne sur {len(bot.guilds)} serveurs.")
     try:
+        # 🔁 Synchronisation GLOBALE (valable sur tous les serveurs)
         synced = await bot.sync_commands()
-        print(f"🔁 {len(synced) if synced else 0} commandes synchronisées.")
+        print(f"🔁 {len(synced) if synced else 0} commandes synchronisées globalement.")
     except Exception as e:
         print(f"⚠️ Sync error: {e}")
 
-# ✅ Chargement SYNCHRONE des cogs (Py-cord 2.5+)
 def load_cogs():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py") and not filename.startswith("__"):
