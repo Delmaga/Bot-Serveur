@@ -8,7 +8,7 @@ class InfoCog(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="bot_info", description="ℹ️ Informations sur un bot")
-    async def bot_info(self, ctx: discord.ApplicationContext, bot: discord.User = None):
+    async def show_bot_info(self, ctx: discord.ApplicationContext, bot: discord.User = None):
         target = bot or self.bot.user
         if not target.bot:
             return await ctx.respond("❌ Ce n'est pas un bot.", ephemeral=True)

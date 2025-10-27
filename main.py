@@ -3,7 +3,6 @@ import os
 import sys
 import asyncio
 
-# 🔒 Désactive la voix (évite l'import d'audioop)
 os.environ["PYCORD_NO_VOICE"] = "1"
 sys.modules["audioop"] = type(sys)("")
 
@@ -14,12 +13,11 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise SystemExit("❌ DISCORD_TOKEN manquant dans Railway.")
 
-# Intents stricts
 intents = discord.Intents.default()
 intents.members = True
 intents.guilds = True
 intents.message_content = True
-intents.presences = True  # Pour détecter bots online/offline
+intents.presences = True
 
 bot = commands.Bot(intents=intents, help_command=None)
 
@@ -28,11 +26,10 @@ async def on_ready():
     print(f"✅ {bot.user} est en ligne sur {len(bot.guilds)} serveurs.")
     try:
         synced = await bot.sync_commands()
-        print(f"🔁 {len(synced)} commandes slash synchronisées.")
+        print(f"🔁 {len(synced) if synced else 0} commandes synchronisées.")
     except Exception as e:
         print(f"⚠️ Sync error: {e}")
 
-# Chargement des cogs
 async def load_cogs():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py") and not filename.startswith("__"):
