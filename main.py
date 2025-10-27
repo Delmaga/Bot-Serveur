@@ -3,6 +3,7 @@ import os
 import sys
 import asyncio
 
+# Désactive la voix
 os.environ["PYCORD_NO_VOICE"] = "1"
 sys.modules["audioop"] = type(sys)("")
 
@@ -30,18 +31,19 @@ async def on_ready():
     except Exception as e:
         print(f"⚠️ Sync error: {e}")
 
-async def load_cogs():
+# ✅ Chargement SYNCHRONE des cogs (Py-cord 2.5+)
+def load_cogs():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py") and not filename.startswith("__"):
             try:
-                await bot.load_extension(f"cogs.{filename[:-3]}")
+                bot.load_extension(f"cogs.{filename[:-3]}")
                 print(f"📦 Cog chargé : {filename}")
             except Exception as e:
                 print(f"❌ Erreur chargement {filename}: {e}")
 
-async def main():
-    await load_cogs()
-    await bot.start(TOKEN)
+def main():
+    load_cogs()
+    bot.run(TOKEN)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
