@@ -1,33 +1,47 @@
 # main.py
 import os
-import discord
-from discord.ext import commands
+import sys
 import asyncio
 
-# Vérifie que le token est bien défini (sinon, crash explicite)
+# 🔒 Désactive la voix AVANT tout import
+os.environ["PYCORD_NO_VOICE"] = "1"
+sys.modules["audioop"] = type(sys)("")  # Mock silencieux
+
+import discord
+from discord.ext import commands
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
-    raise RuntimeError("❌ La variable DISCORD_TOKEN n'est pas définie ! Configure-la dans Railway.")
+    raise SystemExit("❌ ERREUR : DISCORD_TOKEN non défini dans Railway.")
 
-# Intents
-intents = discord.Intents.default()
-intents.members = True
-intents.guilds = True
-intents.message_content = True
-intents.presences = True
+# Intents stricts (pas de voix)
+intents = discord.Intents(
+    guilds=True,
+    members=True,
+    messages=True,
+    message_content=True,
+    presences=True  # Pour détecter bots online/offline
+)
 
-bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
+bot = commands.Bot(intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
     print(f"✅ {bot.user} est en ligne sur {len(bot.guilds)} serveurs.")
-    await bot.tree.sync()
+    try:
+        synced = await bot.sync_commands()
+        print(f"🔁 {len(synced)} commandes slash synchronisées.")
+    except Exception as e:
+        print(f"⚠️ Sync error: {e}")
 
 # Charger les cogs
 async def load_cogs():
     for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
-            await bot.load_extension(f"cogs.{filename[:-3]}")
+        if filename.endswith(".py") and not filename.startswith("__"):
+            try:
+                await bot.load_extension(f"cogs.{filename[:-3]}")
+            except Exception as e:
+                print(f"❌ Erreur chargement {filename}: {e}")
 
 async def main():
     await load_cogs()
