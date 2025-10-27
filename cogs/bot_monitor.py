@@ -5,8 +5,8 @@ from discord.ext import commands, tasks
 class BotMonitor(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.watched = {}  # {guild_id: {bot_id: channel_id}}
-        self.status = {}   # {bot_id: is_online}
+        self.watched = {}
+        self.status = {}
         self.check_bots.start()
 
     def cog_unload(self):
@@ -32,7 +32,16 @@ class BotMonitor(commands.Cog):
             return await ctx.respond("⚠️ Ce bot n’est pas surveillé ici.", ephemeral=True)
         channel = self.bot.get_channel(self.watched[gid][bot.id])
         if channel:
-            await channel.send(f"@everyone 🔁 **{bot}** va redémarrer : {message}")
+            # Embed stylisé pour le redémarrage
+            embed = discord.Embed(
+                title=f"🔄 {bot.name} va redémarrer",
+                description=f"**{message}**\n\n⏰ Redémarrage prévu dans quelques minutes.",
+                color=0xFFA500,  # Orange
+                timestamp=discord.utils.utcnow()
+            )
+            embed.set_footer(text="Sécurité • Mise à jour")
+            embed.set_thumbnail(url=bot.display_avatar.url)
+            await channel.send("@everyone", embed=embed)
         await ctx.respond("✅ Annonce envoyée.", ephemeral=False)
 
     @tasks.loop(seconds=20)
@@ -51,8 +60,27 @@ class BotMonitor(commands.Cog):
                     self.status[bot_id] = is_online
                     channel = self.bot.get_channel(ch_id)
                     if channel:
-                        status = "en ligne ✅" if is_online else "hors ligne ❌"
-                        await channel.send(f"@everyone 🤖 **{member}** est maintenant **{status}**.")
+                        # Création de l'embed stylisé
+                        if is_online:
+                            color = 0x00FF00  # Vert
+                            emoji = "✅"
+                            title = f"{member.name} est maintenant en ligne"
+                            desc = f"Latence : **{round(self.bot.latency * 1000)} ms**\nMise à jour : **Oui**\nVersion : **v1.2.3**"
+                        else:
+                            color = 0xFF0000  # Rouge
+                            emoji = "❌"
+                            title = f"{member.name} est maintenant hors ligne"
+                            desc = "Le bot a été déconnecté. Vérifiez son état."
+
+                        embed = discord.Embed(
+                            title=title,
+                            description=desc,
+                            color=color,
+                            timestamp=discord.utils.utcnow()
+                        )
+                        embed.set_footer(text="Sécurité • Statut du bot")
+                        embed.set_thumbnail(url=member.display_avatar.url)
+                        await channel.send(f"@everyone {emoji}", embed=embed)
 
     @check_bots.before_loop
     async def before_check(self):
