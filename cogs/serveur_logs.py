@@ -6,7 +6,7 @@ from datetime import datetime
 class ServerLogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.log_channels = {}  # {guild_id: channel_id}
+        self.log_channels = {}
 
     @commands.slash_command(name="logs_serveur", description="📄 Définir le salon de logs serveur")
     @commands.has_permissions(administrator=True)
@@ -37,7 +37,7 @@ class ServerLogs(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
         if before.icon != after.icon:
-            await self.log(after.id, f"🖼️ L’icône du serveur a été modifiée.")
+            await self.log(after.id, "🖼️ L’icône du serveur a été modifiée.")
         if before.name != after.name:
             await self.log(after.id, f"📝 Le nom du serveur a été changé en **{after.name}**.")
 

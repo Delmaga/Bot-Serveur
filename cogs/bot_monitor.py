@@ -1,7 +1,6 @@
 # cogs/bot_monitor.py
 import discord
 from discord.ext import commands, tasks
-import asyncio
 
 class BotMonitor(commands.Cog):
     def __init__(self, bot):
